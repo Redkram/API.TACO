@@ -1,0 +1,26 @@
+services:
+  taco:
+    container_name: taco
+    image: api.taco
+    restart: always
+    expose:
+      - "4130"
+      - "4131"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:4131;http://+:4130
+      - Kestrel__Certificates__Default__Path=/https/aspnetcore.pfx
+      - Kestrel__Certificates__Default__Password=sC7xSn5yG3Zl0Wc
+    volumes:
+      - ./data-protection:/root/.aspnet/DataProtection-Keys
+      - ./aspnetcore.pfx:/https/aspnetcore.pfx
+      #.\generate-and-install-cert.ps1 -ServiceName "taco" -ContainerName "taco"
+    networks:
+      - api-net
+
+networks:
+  api-net:
+    external: true
