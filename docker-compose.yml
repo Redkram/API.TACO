@@ -3,9 +3,6 @@ services:
     container_name: taco
     image: api.taco
     restart: always
-    expose:
-      - "4130"
-      - "4131"
     build:
       context: .
       dockerfile: Dockerfile

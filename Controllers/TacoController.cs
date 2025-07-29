@@ -1,15 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using API.Services;
-using System.Security.Claims;
-using API.Models;
-using Newtonsoft.Json;
-using System.Text;
-using Newtonsoft.Json.Linq;
-using Asp.Versioning;
-using API.Dtos;
-using API.Mappers;
+﻿using API.Dtos;
 using API.Filters;
+using API.Mappers;
+using API.Models;
+using API.Services;
+using API.TACO.Class;
+using Asp.Versioning;
+using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
+using System.Net.Mime;
+using System.Security.Claims;
+using System.Text;
 
 namespace API.Controllers
 {
@@ -29,47 +34,74 @@ namespace API.Controllers
 
         
         [ApiExplorerSettings(GroupName = "public")]
-        [HttpPost("Test")]
-        public IActionResult Test()
+        [HttpPost("UploadTacho")]
+        [Consumes("multipart/form-data")]
+        public IActionResult UploadTacho([FromForm] FileUploadRequest request)
         {
-            return Ok(new
+            try
             {
-                data = "HOLA"
-            });
+                if (request.DDD != null)
+                {
+                    var allowedContentTypes = new List<string>
+                    {
+                        "application/octet-stream", "application/ddd", "application/tgd"
+                    };
+
+                    if (!allowedContentTypes.Contains(request.DDD.ContentType))
+                        return BadRequest($"Unsupported file type: {request.DDD.ContentType}");
+
+                    var allowedExtensions = new List<string> { ".ddd", ".tgd" };
+                    var fileExtension = Path.GetExtension(request.DDD.FileName).ToLowerInvariant();
+
+                    if (!allowedExtensions.Contains(fileExtension))
+                        return BadRequest($"Unsupported file extension: {fileExtension}");
+
+                    using var stream = new MemoryStream();
+                    request.DDD.CopyTo(stream);
+                    var dddBytes = stream.ToArray();
+
+                    var uploadsPath = "/app/uploads";
+                    Directory.CreateDirectory(uploadsPath);
+
+                    var fullPath = Path.Combine(uploadsPath, request.DDD.FileName);
+                    using var fileStream = new FileStream(fullPath, FileMode.Create);
+                    fileStream.Write(dddBytes);
+
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "python3",
+                        Arguments = $"/app/scripts/asyncnodex.py \"{fullPath}\"",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    using var process = Process.Start(psi);
+                    if (process == null)
+                        return StatusCode(500, "Error processing the file. The processing script could not be started.");
+
+                    string? output = process.StandardOutput.ReadToEnd();
+                    process.WaitForExit();
+
+                    if (string.IsNullOrWhiteSpace(output))
+                        return StatusCode(500, "Error processing the file. No output was returned from the processing script.");
+
+                    var json = JObject.Parse(output);
+                    var data = json["data"]?.ToString();
+
+                    return Ok(new { data });
+
+
+                }
+                return BadRequest("No file was received in the request.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = "An unexpected error occurred. Please try again later."
+                });
+            }
         }
-
-        
-        //[ApiExplorerSettings(GroupName = "private")]
-        //[HttpPost("GetContact")]
-        //[Authorize(Roles = "Admin, Driver, User")]
-        //[ValidateApiRequest]
-        //public async Task<IActionResult> GetContact([FromBody] PersonnelNumberId _PersonnelNumberId)
-        //{
-        //    try
-        //    {
-        //        int _userId = (int)(HttpContext.Items["UserId"] ?? 0);
-        //        if (_PersonnelNumberId == null || _PersonnelNumberId.PersonnelNumber == null || _PersonnelNumberId.PersonnelNumber == string.Empty) return Unauthorized("Usuario no encontrado");
-        //        string _PersonnelNumber = Convert.ToInt32(_PersonnelNumberId.PersonnelNumber).ToString();
-        //        VIEW_MS_ALL_USERS_DATA? _userData = _myService.GetDFO_UserByPersonnelNumber(_PersonnelNumber);
-        //        if (_userData == null) return BadRequest(MissingUserInfoMessage);
-        //        bool _isXofer = _userData.SRVRRHHISDRIVER == 1;
-
-        //        StringContent _content = new StringContent(JsonConvert.SerializeObject(_PersonnelNumberId), Encoding.UTF8, "application/json");
-        //        string? response = await _myService.CallExternalApiAsync("https://svt:4151/api/v1/SVT/GetOfficeStaffByPersonnelNumber", _content); //Error: Connection refused (svt:443)
-        //        if (string.IsNullOrEmpty(response)) return BadRequest(FailedUserDataMessage);
-        //        var outer = JObject.Parse(response);
-        //        var innerJson = outer["data"]?.ToString();
-        //        USUARIS? _user = JsonConvert.DeserializeObject<USUARIS>(innerJson ?? "");
-        //        if (_user == null) return BadRequest(MissingUserInfoMessage);
-        //        return Ok(new
-        //        {
-        //            data = _myService.Get3CX_User(_user)
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest($"Error: {ex.Message}");
-        //    }
-        //
     }
 }
