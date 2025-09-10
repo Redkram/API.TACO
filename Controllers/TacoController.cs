@@ -1,20 +1,9 @@
-﻿using API.Dtos;
-using API.Filters;
-using API.Mappers;
-using API.Models;
-using API.Services;
+﻿using API.Services;
 using API.TACO.Class;
 using Asp.Versioning;
-using Azure.Core;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
-using System.Net.Mime;
-using System.Security.Claims;
-using System.Text;
 
 namespace API.Controllers
 {
