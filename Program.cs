@@ -15,8 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-builder.Services.AddDbContext<MySQLDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MySQLConnection")));
-
+builder.Services.AddDbContext<MySQLDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("MySQLConnection"),
+    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySQLConnection")))
+); ;
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
 
 builder.Services.AddAuthentication(options =>
@@ -50,6 +52,7 @@ builder.Services.AddHttpClient<MyFuncions>(client =>
 // Configuración de servicios adicionales
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<MyService>();
+builder.Services.AddScoped<StorageService>();
 builder.Services.AddScoped<MyFuncions>();
 
 builder.Services.AddControllers();

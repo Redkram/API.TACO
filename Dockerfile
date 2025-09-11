@@ -1,13 +1,8 @@
 ﻿# Imagen base de .NET Core sin Alpine
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-
-RUN apt-get update && \
-    apt-get install -y openssl ca-certificates python3 python3-pip && \
-    rm -rf /var/lib/apt/lists/*
-
+RUN apt-get update && apt-get install -y openssl ca-certificates
 WORKDIR /app
 
-# Utilizar imagen SDK de .NET para la construcción
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["API.TACO.csproj", "./"]
@@ -22,8 +17,6 @@ RUN dotnet publish "API.TACO.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY scripts/ /app/scripts/
-COPY uploads/ /app/uploads/
 
 # Variables de entorno
 ENV ASPNETCORE_ENVIRONMENT=Production

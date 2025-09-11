@@ -1,21 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using API.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
-using API.Data;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Azure;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Diagnostics;
-using System.Globalization;
+﻿using API.Data;
 
 namespace API.Services
 {

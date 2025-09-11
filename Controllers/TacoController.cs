@@ -10,7 +10,7 @@ namespace API.Controllers
     [ApiVersion("1")]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
-    public class TacoController(MyService myService) : ControllerBase
+    public class TacoController(MyService myService, StorageService storageService) : ControllerBase
     {
 
         private const string MissingUserInfoMessage = "Not user info";
@@ -20,69 +20,39 @@ namespace API.Controllers
 
 
         private readonly MyService _myService = myService;
+        private readonly StorageService _storageService = storageService;
 
-        
+
+
         [ApiExplorerSettings(GroupName = "public")]
         [HttpPost("UploadTacho")]
         [Consumes("multipart/form-data")]
-        public IActionResult UploadTacho([FromForm] FileUploadRequest request)
+        public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
         {
             try
             {
-                if (request.DDD != null)
-                {
-                    var allowedContentTypes = new List<string>
-                    {
-                        "application/octet-stream", "application/ddd", "application/tgd"
-                    };
+                if (request.DDD == null || request.DDD.Length == 0)
+                    return BadRequest("No file was received in the request.");
 
-                    if (!allowedContentTypes.Contains(request.DDD.ContentType))
-                        return BadRequest($"Unsupported file type: {request.DDD.ContentType}");
+                var allowedContentTypes = new List<string>
+            {
+                "application/octet-stream", "application/ddd", "application/tgd"
+            };
 
-                    var allowedExtensions = new List<string> { ".ddd", ".tgd" };
-                    var fileExtension = Path.GetExtension(request.DDD.FileName).ToLowerInvariant();
+                if (!allowedContentTypes.Contains(request.DDD.ContentType))
+                    return BadRequest($"Unsupported file type: {request.DDD.ContentType}");
 
-                    if (!allowedExtensions.Contains(fileExtension))
-                        return BadRequest($"Unsupported file extension: {fileExtension}");
+                var allowedExtensions = new List<string> { ".ddd", ".tgd" };
+                var fileExtension = Path.GetExtension(request.DDD.FileName).ToLowerInvariant();
 
-                    using var stream = new MemoryStream();
-                    request.DDD.CopyTo(stream);
-                    var dddBytes = stream.ToArray();
+                if (!allowedExtensions.Contains(fileExtension))
+                    return BadRequest($"Unsupported file extension: {fileExtension}");
 
-                    var uploadsPath = "/app/uploads";
-                    Directory.CreateDirectory(uploadsPath);
+                // 👇 Guardar en el bucket con nombre fijo "0"
+                var objectName = "0" + fileExtension;
+                var path = await _storageService.UploadFileAsync(request.DDD, objectName);
 
-                    var fullPath = Path.Combine(uploadsPath, request.DDD.FileName);
-                    using var fileStream = new FileStream(fullPath, FileMode.Create);
-                    fileStream.Write(dddBytes);
-
-                    var psi = new ProcessStartInfo
-                    {
-                        FileName = "python3",
-                        Arguments = $"/app/scripts/asyncnodex.py \"{fullPath}\"",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-
-                    using var process = Process.Start(psi);
-                    if (process == null)
-                        return StatusCode(500, "Error processing the file. The processing script could not be started.");
-
-                    string? output = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-
-                    if (string.IsNullOrWhiteSpace(output))
-                        return StatusCode(500, "Error processing the file. No output was returned from the processing script.");
-
-                    var json = JObject.Parse(output);
-                    var data = json["data"]?.ToString();
-
-                    return Ok(new { data });
-
-
-                }
-                return BadRequest("No file was received in the request.");
+                return Ok(new { Path = path });
             }
             catch (Exception ex)
             {
