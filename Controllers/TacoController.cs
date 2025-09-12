@@ -26,7 +26,7 @@ namespace API.Controllers
 
         [HttpPost("UploadTacho")]
         [Consumes("multipart/form-data")]
-        [Authorize(Roles = "1")]
+        [Authorize]
         [ValidateApiRequest(RequiredCredentialsId = [1])]
         [ApiExplorerSettings(GroupName = "private")]
         public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
@@ -77,9 +77,9 @@ namespace API.Controllers
         {
             try
             {
-                var _userId = HttpContext.Items["UserId"] ;
-                var _credentialsId = HttpContext.Items["CredentialsId"];
-                var _rol = HttpContext.Items["Role"];
+                int _userId = (int) (HttpContext.Items["UserId"] ?? 0);
+                int _credentialsId = (int)(HttpContext.Items["CredentialsId"] ?? 0);
+                int _rol = (int)(HttpContext.Items["RoleId"] ?? 0);
                 return Ok(new { user = _userId, role = _rol, credentialsId = _credentialsId });
 
             }

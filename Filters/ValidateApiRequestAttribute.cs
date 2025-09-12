@@ -26,39 +26,33 @@ namespace API.Filters
             var roleClaim = httpContext.User.FindFirst(ClaimTypes.Role);
             var credentialsClaim = httpContext.User.FindFirst("credentialsId");
 
-            //if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId) || userId == 0)
-            //{
-            //    context.Result = new UnauthorizedObjectResult(MissingUserIdMessage);
-            //    return;
-            //}
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId) || userId == 0)
+            {
+                context.Result = new UnauthorizedObjectResult(MissingUserIdMessage);
+                return;
+            }
 
-            //if (credentialsClaim == null)
-            //{
-            //    context.Result = new UnauthorizedObjectResult(MissingCredentialsIdMessage);
-            //    return;
-            //}
+            if (credentialsClaim == null || !int.TryParse(credentialsClaim.Value, out int credentialsId) || credentialsId == 0)
+            {
+                context.Result = new UnauthorizedObjectResult(MissingCredentialsIdMessage);
+                return;
+            }
 
-            //if (roleClaim == null)
-            //{
-            //    context.Result = new UnauthorizedObjectResult(MissingRoleIdMessage);
-            //    return;
-            //}
+            if (roleClaim == null || !int.TryParse(roleClaim.Value, out int roleId) || roleId == 0)
+            {
+                context.Result = new UnauthorizedObjectResult(MissingRoleIdMessage);
+                return;
+            }
 
-            //if (!int.TryParse(credentialsClaim.Value, out int credentialsId))
-            //{
-            //    context.Result = new UnauthorizedObjectResult(InvalidCredentialsIdMessage);
-            //    return;
-            //}
+            if (RequiredCredentialsId != null && !RequiredCredentialsId.Contains(credentialsId))
+            {
+                context.Result = new UnauthorizedObjectResult(InvalidCredentialsIdMessage);
+                return;
+            }
 
-            //if (RequiredCredentialsId != null && !RequiredCredentialsId.Contains(credentialsId))
-            //{
-            //    context.Result = new UnauthorizedObjectResult(InvalidCredentialsIdMessage);
-            //    return;
-            //}
-
-            httpContext.Items["UserId"] = userIdClaim;
-            httpContext.Items["CredentialsId"] = credentialsClaim;
-            httpContext.Items["Role"] = roleClaim;
+            httpContext.Items["UserId"] = userId;
+            httpContext.Items["CredentialsId"] = credentialsId;
+            httpContext.Items["RoleId"] = roleId;
 
             base.OnActionExecuting(context);
         }
