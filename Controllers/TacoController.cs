@@ -77,9 +77,10 @@ namespace API.Controllers
         {
             try
             {
-                int _userId = (int)(HttpContext.Items["UserId"] ?? 0);
-                int _rol = (int)(HttpContext.Items["Role"] ?? 0);
-                return Ok(new { user = _userId, role = _rol });
+                var _userId = HttpContext.Items["UserId"] ;
+                var _credentialsId = HttpContext.Items["CredentialsId"];
+                var _rol = HttpContext.Items["Role"];
+                return Ok(new { user = _userId, role = _rol, credentialsId = _credentialsId });
 
             }
             catch (Exception ex)
