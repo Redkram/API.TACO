@@ -12,6 +12,7 @@ namespace API.Filters
 
         private const string MissingUserIdMessage = "User not found or unauthorized.";
         private const string MissingCredentialsIdMessage = "Missing credentialsId claim.";
+        private const string MissingRoleIdMessage = "Missing role claim.";
         private const string InvalidCredentialsIdMessage = "Invalid or unauthorized credentialsId claim.";
 
         public override void OnActionExecuting(ActionExecutingContext context)
@@ -23,6 +24,7 @@ namespace API.Filters
             
             var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             var credentialsClaim = httpContext.User.FindFirst("credentialsId");
+            var role = httpContext.User.FindFirst(ClaimTypes.Role);
 
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId) || userId == 0)
             {
@@ -33,6 +35,12 @@ namespace API.Filters
             if (credentialsClaim == null)
             {
                 context.Result = new UnauthorizedObjectResult(MissingCredentialsIdMessage);
+                return;
+            }
+
+            if (role == null)
+            {
+                context.Result = new UnauthorizedObjectResult(MissingRoleIdMessage);
                 return;
             }
 
@@ -50,6 +58,7 @@ namespace API.Filters
 
             httpContext.Items["UserId"] = (int) userId;
             httpContext.Items["CredentialsId"] = (int) credentialsId;
+            httpContext.Items["Role"] =  role;
 
             base.OnActionExecuting(context);
         }

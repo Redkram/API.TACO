@@ -68,5 +68,29 @@ namespace API.Controllers
                 });
             }
         }
+
+        [HttpPost("Test")]
+        [Authorize]
+        [ValidateApiRequest(RequiredCredentialsId = [1])]
+        [ApiExplorerSettings(GroupName = "private")]
+        public async Task<IActionResult> Test()
+        {
+            try
+            {
+                int _userId = (int)(HttpContext.Items["UserId"] ?? 0);
+                int _rol = (int)(HttpContext.Items["Role"] ?? 0);
+                return Ok(new { user = _userId, role = _rol });
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    error = "An unexpected error occurred",
+                    details = ex.Message,
+                    stack = ex.StackTrace
+                });
+            }
+        }
     }
 }
