@@ -26,14 +26,12 @@ namespace API.Controllers
 
         [HttpPost("UploadTacho")]
         [Consumes("multipart/form-data")]
-        [Authorize]
-        [ValidateApiRequest(RequiredCredentialsId = [1])]
-        [ApiExplorerSettings(GroupName = "private")]
+        [ApiExplorerSettings(GroupName = "public")]
         public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
         {
             try
             {
-                int _userId = (int)(HttpContext.Items["UserId"] ?? 0);
+                int _userId = 0;
 
                 if (request.DDD == null || request.DDD.Length == 0)
                     return BadRequest("No file was received in the request.");
