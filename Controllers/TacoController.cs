@@ -52,9 +52,9 @@ namespace API.Controllers
 
                 // 👇 Guardar en el bucket con nombre fijo "0"
                 var objectName = $"originals/{_userId}/{request.DDD.FileName}";
-                var path = await _storageService.UploadFileAsync(request.DDD, objectName);
+                //var path = await _storageService.UploadFileAsync(request.DDD, objectName);
 
-                return Ok(new { Path = path });
+                return Ok(new { Path = objectName });
             }
             catch (Exception ex)
             {
