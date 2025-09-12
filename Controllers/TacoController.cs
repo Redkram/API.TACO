@@ -25,7 +25,7 @@ namespace API.Controllers
         private readonly StorageService _storageService = storageService;
 
         [HttpPost("UploadTacho")]
-        [Consumes("multipart/form-data")]
+        //[Consumes("multipart/form-data")]
         [ApiExplorerSettings(GroupName = "public")]
         public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
         {
@@ -33,28 +33,28 @@ namespace API.Controllers
             {
                 int _userId = 0;
 
-                if (request.DDD == null || request.DDD.Length == 0)
-                    return BadRequest("No file was received in the request.");
+                //if (request.DDD == null || request.DDD.Length == 0)
+                //    return BadRequest("No file was received in the request.");
 
-                    var allowedContentTypes = new List<string>
-                {
-                    "application/octet-stream", "application/ddd", "application/tgd", "application/json"
-                };
+                //    var allowedContentTypes = new List<string>
+                //{
+                //    "application/octet-stream", "application/ddd", "application/tgd", "application/json"
+                //};
 
-                if (!allowedContentTypes.Contains(request.DDD.ContentType))
-                    return BadRequest($"Unsupported file type: {request.DDD.ContentType}");
+                //if (!allowedContentTypes.Contains(request.DDD.ContentType))
+                //    return BadRequest($"Unsupported file type: {request.DDD.ContentType}");
 
-                var allowedExtensions = new List<string> { ".ddd", ".tgd", ".json" };
-                var fileExtension = Path.GetExtension(request.DDD.FileName).ToLowerInvariant();
+                //var allowedExtensions = new List<string> { ".ddd", ".tgd", ".json" };
+                //var fileExtension = Path.GetExtension(request.DDD.FileName).ToLowerInvariant();
 
-                if (!allowedExtensions.Contains(fileExtension))
-                    return BadRequest($"Unsupported file extension: {fileExtension}");
+                //if (!allowedExtensions.Contains(fileExtension))
+                //    return BadRequest($"Unsupported file extension: {fileExtension}");
 
-                // 👇 Guardar en el bucket con nombre fijo "0"
-                var objectName = $"originals/{_userId}/{request.DDD.FileName}";
-                //var path = await _storageService.UploadFileAsync(request.DDD, objectName);
+                //// 👇 Guardar en el bucket con nombre fijo "0"
+                //var objectName = $"originals/{_userId}/{request.DDD.FileName}";
+                ////var path = await _storageService.UploadFileAsync(request.DDD, objectName);
 
-                return Ok(new { Path = objectName });
+                return Ok(new { Path = "OK" });
             }
             catch (Exception ex)
             {
