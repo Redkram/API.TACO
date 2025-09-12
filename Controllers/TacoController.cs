@@ -54,7 +54,7 @@ namespace API.Controllers
                 //var objectName = $"originals/{_userId}/{request.DDD.FileName}";
                 ////var path = await _storageService.UploadFileAsync(request.DDD, objectName);
 
-                return Ok(new { Path = "OK" });
+                return Ok(new { Path = request.DDD });
             }
             catch (Exception ex)
             {
