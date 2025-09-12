@@ -1,6 +1,8 @@
-﻿using API.Services;
+﻿using API.Filters;
+using API.Services;
 using API.TACO.Class;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -22,34 +24,36 @@ namespace API.Controllers
         private readonly MyService _myService = myService;
         private readonly StorageService _storageService = storageService;
 
-
-
-        [ApiExplorerSettings(GroupName = "public")]
         [HttpPost("UploadTacho")]
         [Consumes("multipart/form-data")]
+        [Authorize(Roles = "1")]
+        [ValidateApiRequest(RequiredCredentialsId = [1])]
+        [ApiExplorerSettings(GroupName = "private")]
         public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
         {
             try
             {
+                int _userId = (int)(HttpContext.Items["UserId"] ?? 0);
+
                 if (request.DDD == null || request.DDD.Length == 0)
                     return BadRequest("No file was received in the request.");
 
-                var allowedContentTypes = new List<string>
-            {
-                "application/octet-stream", "application/ddd", "application/tgd"
-            };
+                    var allowedContentTypes = new List<string>
+                {
+                    "application/octet-stream", "application/ddd", "application/tgd", "application/json"
+                };
 
                 if (!allowedContentTypes.Contains(request.DDD.ContentType))
                     return BadRequest($"Unsupported file type: {request.DDD.ContentType}");
 
-                var allowedExtensions = new List<string> { ".ddd", ".tgd" };
+                var allowedExtensions = new List<string> { ".ddd", ".tgd", ".json" };
                 var fileExtension = Path.GetExtension(request.DDD.FileName).ToLowerInvariant();
 
                 if (!allowedExtensions.Contains(fileExtension))
                     return BadRequest($"Unsupported file extension: {fileExtension}");
 
                 // 👇 Guardar en el bucket con nombre fijo "0"
-                var objectName = "0" + fileExtension;
+                var objectName = $"originals/{_userId}/{request.DDD.FileName}";
                 var path = await _storageService.UploadFileAsync(request.DDD, objectName);
 
                 return Ok(new { Path = path });
@@ -58,7 +62,9 @@ namespace API.Controllers
             {
                 return StatusCode(500, new
                 {
-                    error = "An unexpected error occurred. Please try again later."
+                    error = "An unexpected error occurred",
+                    details = ex.Message,
+                    stack = ex.StackTrace
                 });
             }
         }
