@@ -13,7 +13,7 @@ namespace API.Controllers
     [ApiVersion("1")]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
-    public class TacoController() : ControllerBase
+    public class TacoController(MyService myService) : ControllerBase
     {
 
         private const string MissingUserInfoMessage = "Not user info";
