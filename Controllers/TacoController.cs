@@ -26,9 +26,8 @@ namespace API.Controllers
         private readonly StorageService _storageService = storageService;
 
         [HttpPost("UploadTacho")]
-        [Consumes("multipart/form-data")]
 
-        public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
+        public async Task<IActionResult> UploadTacho()
         {
             try
             { 
