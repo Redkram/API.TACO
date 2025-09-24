@@ -115,12 +115,16 @@ builder.Services.AddSwaggerGen(c =>
 
 });
 builder.Logging.AddDebug().AddConsole();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
 var app = builder.Build();
 
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseSwagger();
+app.UseDeveloperExceptionPage();
+app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/private/swagger.json", "Private API");

@@ -13,7 +13,7 @@ namespace API.Controllers
     [ApiVersion("1")]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
-    public class TacoController(MyService myService) : ControllerBase
+    public class TacoController(MyService myService, StorageService storageService) : ControllerBase
     {
 
         private const string MissingUserInfoMessage = "Not user info";
@@ -22,8 +22,8 @@ namespace API.Controllers
         private const string FailedUserDataMessage = "Failed to fetch user data.";
 
 
-
         [HttpPost("UploadTacho")]
+        [Consumes("multipart/form-data")]
 
         public async Task<IActionResult> UploadTacho()
         {
