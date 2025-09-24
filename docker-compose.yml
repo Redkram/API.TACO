@@ -14,6 +14,7 @@ services:
     volumes:
       - ./data-protection:/root/.aspnet/DataProtection-Keys
       - ./aspnetcore.pfx:/https/aspnetcore.pfx
+      - ./keys/daring-avenue-471019-k3-32d0a3196e0c.json:/keys/daring-avenue-471019-k3-32d0a3196e0c.json:ro
       #.\generate-and-install-cert.ps1 -ServiceName "taco" -ContainerName "taco"
     networks:
       - api-net

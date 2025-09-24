@@ -38,7 +38,7 @@ namespace API.Controllers
                 if (request.DDD == null || request.DDD.Length == 0)
                     return BadRequest("No file was received in the request.");
 
-                    var allowedContentTypes = new List<string>
+                var allowedContentTypes = new List<string>
                 {
                     "application/octet-stream", "application/ddd", "application/tgd", "application/json"
                 };
@@ -54,9 +54,11 @@ namespace API.Controllers
 
                 // 👇 Guardar en el bucket con nombre fijo "0"
                 var objectName = $"originals/{_userId}/{request.DDD.FileName}";
-                var path = await _storageService.UploadFileAsync(request.DDD, objectName);
+                await _storageService.UploadFileAsync(request.DDD, objectName);
 
-                return Ok(new { Path = path });
+                var signedUrl = _storageService.GetSignedUrl(objectName, TimeSpan.FromDays(1));
+
+                return Ok(new { SignedUrl = signedUrl });
             }
             catch (Exception ex)
             {
@@ -69,29 +71,5 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("Test")]
-        [Authorize]
-        [ValidateApiRequest(RequiredCredentialsId = [1])]
-        [ApiExplorerSettings(GroupName = "private")]
-        public async Task<IActionResult> Test()
-        {
-            try
-            {
-                int _userId = (int) (HttpContext.Items["UserId"] ?? 0);
-                int _credentialsId = (int)(HttpContext.Items["CredentialsId"] ?? 0);
-                int _rol = (int)(HttpContext.Items["RoleId"] ?? 0);
-                return Ok(new { user = _userId, role = _rol, credentialsId = _credentialsId });
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    error = "An unexpected error occurred",
-                    details = ex.Message,
-                    stack = ex.StackTrace
-                });
-            }
-        }
     }
 }
