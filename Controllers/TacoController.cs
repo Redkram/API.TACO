@@ -27,9 +27,7 @@ namespace API.Controllers
 
         [HttpPost("UploadTacho")]
         [Consumes("multipart/form-data")]
-        [Authorize]
-        [ValidateApiRequest(RequiredCredentialsId = [1])]
-        [ApiExplorerSettings(GroupName = "private")]
+
         public async Task<IActionResult> UploadTacho([FromForm] FileUploadRequest request)
         {
             try
