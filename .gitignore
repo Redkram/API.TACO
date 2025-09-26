@@ -10,6 +10,7 @@ dist/
 obj/
 bin/
 keys/*
+data-protection/
 
 # Compiled Java class files
 *.class

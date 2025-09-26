@@ -9,8 +9,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=https://+:4131
-      - Kestrel__Certificates__Default__Path=/https/aspnetcore.pfx
-      - Kestrel__Certificates__Default__Password=sC7xSn5yG3Zl0Wc
     volumes:
       - ./data-protection:/root/.aspnet/DataProtection-Keys
       - ./aspnetcore.pfx:/https/aspnetcore.pfx
